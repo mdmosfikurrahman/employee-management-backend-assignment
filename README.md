@@ -17,30 +17,26 @@ Candidates are expected to implement a simplified **Employee Management System (
 - Reporting system
 - Logging and auditing
 
-This assignment mirrors the **architecture and engineering standards used in production systems**.
+This assignment reflects the **architecture and engineering standards used in production systems**.
 
 ---
 
 # Assignment Objective
 
-The system must manage:
+The system must support the following capabilities:
 
-- Employees
-- Departments
-- Designations
+- Employee Management
+- Department Management
+- Designation Management
 - Salary Disbursement
 - Reporting
 - Authentication
 - Role Based Access Control
 - Logging
 
-Candidates must demonstrate:
+Candidates are responsible for designing the **database schema, entity relationships, and data structure**.
 
-- Proper architecture
-- Clean code
-- Consistent API contracts
-- Proper error handling
-- Multi-database management
+The focus of this assignment is not only functionality but also **architecture, design decisions, and code quality**.
 
 ---
 
@@ -53,6 +49,8 @@ Candidates must demonstrate:
 - Entity Framework Core
 
 ## Databases
+
+The system must use **two separate databases**.
 
 | Database | Purpose |
 |--------|--------|
@@ -76,6 +74,8 @@ EmployeeManagement.Shared
 EmployeeManagement.Configuration
 EmployeeManagement.WebAPI
 ```
+
+Each layer must have clearly defined responsibilities.
 
 ---
 
@@ -102,62 +102,62 @@ Layer Responsibilities
 
 | Layer | Responsibility |
 |------|------|
-| WebAPI | Controllers, HTTP handling |
+| WebAPI | Controllers and request handling |
 | Application | Business logic |
-| Persistence | Database access |
-| Domain | Entities |
+| Persistence | Database interaction |
+| Domain | Core business entities |
 | Infrastructure | External services |
-| Shared | Utilities & responses |
-| Configuration | DI & middleware |
+| Shared | Utilities and response models |
+| Configuration | Dependency injection and middleware |
 
 ---
 
-# Domain Layer
+# Domain Design
 
-Contains core business entities.
+Candidates must design domain entities representing:
 
-Example structure
+- Employees
+- Departments
+- Designations
+- Salary Disbursement
+- Users
+- Roles
+- Permissions
+
+Entity relationships must be designed logically based on the system requirements.
+
+The domain layer should contain:
 
 ```
 Domain
  ├── Models
- │     ├── Employee
- │     ├── Department
- │     ├── Designation
- │     ├── SalaryDisbursement
- │     ├── User
- │     └── Role
- │
- ├── Enum
- │     └── UserRole
- │
+ ├── Enums
  └── Common
-       ├── BaseEntity
-       └── BaseAuditEntity
 ```
 
 Rules
 
-- No framework dependency
 - No database logic
+- No framework dependencies
+- Only domain entities and rules
 
 ---
 
 # Application Layer
 
-Contains:
+The application layer must contain:
 
-- Business logic
 - DTOs
-- Validators
 - Services
+- Validators
 - Mappers
+- Business logic
 
-Structure
+Structure example
 
 ```
 Application
- ├── Dto
+ ├── DTO
  │     ├── Request
  │     └── Response
  │
@@ -169,70 +169,73 @@ Application
  └── Mappers
 ```
 
-Example Services
+Expected services may include:
 
-```
-AuthService
-EmployeeService
-DepartmentService
-DesignationService
-SalaryService
-ReportService
-```
+- Authentication service
+- Employee management service
+- Department service
+- Designation service
+- Salary service
+- Reporting service
 
 ---
 
 # Persistence Layer
 
-Handles database interaction.
+Responsible for database access.
 
 ```
 Persistence
  ├── DbContext
- ├── Configurations
+ ├── Entity Configurations
  ├── Repositories
- │     ├── Interfaces
- │     └── Implementations
  ├── UnitOfWork
  └── Database
 ```
+
+Responsibilities
+
+- Entity Framework configurations
+- Database interaction
+- Repository pattern
+- Unit of Work implementation
+
+Database design decisions must be made by the candidate.
 
 ---
 
 # Infrastructure Layer
 
-Responsible for external integrations.
+Responsible for integrations and external services.
 
-Examples
+Examples may include:
 
-```
-Infrastructure
- ├── LoggingService
- └── EmailService
-```
+- Logging service
+- Email service
+- Notification service
 
 ---
 
 # Shared Layer
 
-Contains shared utilities.
+Contains reusable components.
 
 ```
 Shared
  ├── Config
  ├── DTO
  ├── Exceptions
- ├── Utils
- └── ApiResponse
+ ├── Utilities
+ └── API Response models
 ```
 
 ---
 
 # API Response Standard
 
-All APIs must return responses using **StandardResponse**.
+All API responses must follow a **consistent response structure**.
 
-Example Structure
+Example Response
 
 ```
 {
@@ -244,7 +247,7 @@ Example Structure
 }
 ```
 
-StandardResponse Model
+Example Model
 
 ```
 public class StandardResponse
@@ -257,55 +260,27 @@ public class StandardResponse
 }
 ```
 
-Use helper methods for generating responses.
-
-Example
-
-```
-ApiResponseHelper.Success("Employees retrieved", data)
-ApiResponseHelper.Created("Employee", employee)
-ApiResponseHelper.ValidationError(...)
-```
+Helper classes may be used to standardize API responses.
 
 ---
 
 # Authentication
 
-JWT based authentication must be implemented.
+JWT authentication must be implemented.
 
-Login Endpoint
+Example login endpoint:
 
 ```
 POST /api/auth/login
 ```
 
-Request
-
-```
-{
-  "email": "admin@company.com",
-  "password": "password"
-}
-```
-
-Response
-
-```
-{
-  "isSuccess": true,
-  "statusCode": "200",
-  "message": "Login successful",
-  "data": {
-    "accessToken": "jwt-token"
-  }
-}
-```
+The authentication system must issue a **JWT token** upon successful login.
 
 ---
 
 # Logout
 
-Endpoint
+A logout endpoint must be implemented.
 
 ```
 POST /api/auth/logout
@@ -313,58 +288,32 @@ POST /api/auth/logout
 
 Requirements
 
-- Logout event must be logged
-- Token must be invalidated client-side
+- Logout activity must be logged
+- Client must discard stored token
 
 ---
 
 # RBAC (Database Based)
 
-Authorization must be **database driven**.
+Authorization must be **database-driven**.
 
-Do NOT use:
+Do not rely solely on framework role attributes.
 
-```
-[Authorize(Roles="Admin")]
-```
+Instead implement a permission-based access system using database entities.
 
-Instead implement:
+Conceptual flow
 
 ```
-Roles Table
-Permissions Table
-RolePermissionMappings
+User → Role → Permission → API Access
 ```
 
-Flow
-
-```
-User -> Role -> Permissions -> API Access
-```
-
-Tables
-
-```
-Users
-Roles
-Permissions
-RolePermissionMappings
-```
-
-Permission Example
-
-| Role | Permission |
-|-----|------|
-Admin | full access |
-HR | employee management |
-Manager | reporting |
-Employee | view own profile |
+The authorization system should be flexible enough to allow role-permission mapping.
 
 ---
 
-# Core Modules
+# Core Functional Modules
 
-The system must contain:
+The system must include the following modules:
 
 - Department Management
 - Designation Management
@@ -373,224 +322,138 @@ The system must contain:
 - Reporting
 - Logging
 
----
-
-# Employee Module
-
-Endpoints
-
-```
-POST /api/employees
-GET /api/employees
-GET /api/employees/{id}
-PUT /api/employees/{id}
-DELETE /api/employees/{id}
-```
+Exact database schema and entity fields must be designed by the candidate.
 
 ---
 
-# Department Module
+# Employee Management
 
-Endpoints
+The system must support:
 
-```
-POST /api/departments
-GET /api/departments
-PUT /api/departments/{id}
-DELETE /api/departments/{id}
-```
+- Creating employees
+- Updating employee information
+- Retrieving employee data
+- Deactivating employees
+
+Employee records must be associated with a department and designation.
 
 ---
 
-# Designation Module
+# Department Management
 
-Endpoints
+The system must support:
 
-```
-POST /api/designations
-GET /api/designations
-PUT /api/designations/{id}
-DELETE /api/designations/{id}
-```
+- Creating departments
+- Updating department information
+- Listing departments
+- Removing departments
+
+---
+
+# Designation Management
+
+The system must support:
+
+- Creating designations
+- Updating designations
+- Listing designations
 
 ---
 
 # Salary Disbursement
 
-Entity
+The system must support salary disbursement for employees.
 
-```
-SalaryDisbursement
-```
+Salary must be handled on a **monthly basis**.
 
-Formula
+The system should support:
 
-```
-NetSalary = BaseSalary + Bonus - Deduction
-```
+- Recording salary payments
+- Tracking salary history
+- Managing salary adjustments
 
----
-
-# Salary APIs
-
-```
-POST /api/salaries/disburse
-GET /api/salaries/employee/{employeeId}
-GET /api/salaries/monthly
-```
+Salary calculation logic must be implemented in the application layer.
 
 ---
 
 # Reporting Layer
 
-Reports required
+The system must implement a **reporting layer** capable of generating aggregated data.
 
-Total Salary Paid
+Example reports include:
 
-```
-GET /api/reports/salary/total
-```
+- Total salary disbursed
+- Salary distribution by department
+- Monthly salary summary
+- Employee salary history
 
-Salary By Department
-
-```
-GET /api/reports/salary/by-department
-```
-
-Monthly Salary Report
-
-```
-GET /api/reports/salary/monthly
-```
-
-Employee Salary Report
-
-```
-GET /api/reports/salary/employee/{employeeId}
-```
-
----
-
-# ER Diagram
-
-```
-Departments
-   │
-   ├──< Employees >── Designations
-   │
-   └── SalaryDisbursements
-
-Users
-  │
-  └── Roles
-        │
-        └── RolePermissions
-```
+Report generation logic should be separated from core business logic.
 
 ---
 
 # Logging System
 
-Logs must be stored in **PostgreSQL**.
+All system logs must be stored in **PostgreSQL**.
 
-Log Types
+Logs should capture events such as:
 
 - Login
 - Logout
-- Entity Create
-- Entity Update
-- Entity Delete
-- Errors
+- Entity creation
+- Entity update
+- Entity deletion
+- System errors
 
-Log Fields
-
-```
-Id
-UserId
-Action
-Entity
-Description
-Timestamp
-```
-
-Example
-
-```
-Employee created by Admin
-Salary disbursed for March
-Login attempt
-```
+Log records should include sufficient metadata to trace system activity.
 
 ---
 
 # Validation
 
-Use **FluentValidation**
+Request validation must be implemented using **FluentValidation**.
 
-Examples
+Validation examples include:
 
-- Email must be valid
-- Salary must be positive
-- Department must exist
-- Only one salary disbursement per employee per month
+- Email format validation
+- Required fields
+- Logical data constraints
+- Business rule validation
 
 ---
 
 # Error Handling
 
-Global exception middleware must be implemented.
+A **global exception handling middleware** must be implemented.
 
-Example response
+All errors must return a structured API response.
+
+Example
 
 ```
 {
   "isSuccess": false,
   "statusCode": "404",
-  "message": "Employee not found",
+  "message": "Resource not found",
   "errors": []
 }
 ```
 
 ---
 
-# Database Tables
-
-Main DB (MSSQL)
-
-```
-Employees
-Departments
-Designations
-Users
-Roles
-Permissions
-RolePermissionMappings
-SalaryDisbursements
-```
-
-Logging DB (PostgreSQL)
-
-```
-ApplicationLogs
-LoginLogs
-```
-
----
-
 # Deliverables
 
-Engineers must submit
+Candidates must submit:
 
 1. Source code repository
-2. Database migrations or SQL scripts
+2. Database migrations or scripts
 3. README with setup instructions
 
-README must include
+The README must contain:
 
-- Setup instructions
-- Database configuration
-- Running the project
-- API examples
+- Project setup instructions
+- Database configuration steps
+- Running the application
+- API testing instructions
 
 ---
 
@@ -602,16 +465,16 @@ Architecture | High |
 Code Quality | High |
 Authentication | High |
 Database Design | High |
-Reporting | Medium |
-Logging | Medium |
+Reporting Implementation | Medium |
+Logging System | Medium |
 Documentation | Medium |
 
 ---
 
 # Bonus (Optional)
 
-Optional features
+Optional improvements may include:
 
 - Pagination
 - Filtering
-- CSV salary export
+- CSV export for reports
