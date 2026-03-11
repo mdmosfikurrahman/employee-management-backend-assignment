@@ -377,21 +377,6 @@ The system must contain:
 
 # Employee Module
 
-Fields
-
-| Field | Type |
-|-----|------|
-Id | Guid |
-FirstName | string |
-LastName | string |
-Email | string |
-Phone | string |
-DepartmentId | Guid |
-DesignationId | Guid |
-Salary | decimal |
-JoinDate | date |
-IsActive | bool |
-
 Endpoints
 
 ```
@@ -437,21 +422,6 @@ Entity
 ```
 SalaryDisbursement
 ```
-
-Fields
-
-| Field | Type |
-|------|------|
-Id | Guid |
-EmployeeId | Guid |
-SalaryMonth | int |
-SalaryYear | int |
-BaseSalary | decimal |
-Bonus | decimal |
-Deduction | decimal |
-NetSalary | decimal |
-PaidDate | datetime |
-Status | Pending / Paid |
 
 Formula
 
